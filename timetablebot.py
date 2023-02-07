@@ -1,6 +1,7 @@
 import logging
+from functools import partial
 from config import Config
-from telegram import ForceReply, Update
+from telegram import ForceReply, Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     Application,
     CommandHandler,
@@ -8,6 +9,7 @@ from telegram.ext import (
     MessageHandler,
     filters,
 )
+import sheets
 
 # Enable logging
 logging.basicConfig(
@@ -18,12 +20,16 @@ logger = logging.getLogger(__name__)
 
 # Define a few command handlers. These usually take the two arguments update and
 # context.
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def start(timetable, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Send a message when the command /start is issued."""
     user = update.effective_user
-    await update.message.reply_html(
-        rf"Hi {user.mention_html()}!",
-        reply_markup=ForceReply(selective=True),
+
+    keyboard = [[InlineKeyboardButton(k, callback_data=k) for k in timetable.keys()]]
+
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    await update.message.reply_text(
+        f"Hi {user.full_name}! Select a subsidiary:", reply_markup=reply_markup
     )
 
 
@@ -38,12 +44,13 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 def main() -> None:
+    timetable = sheets.request_sheets()
+
     """Start the bot."""
-    # Create the Application and pass it your bot's token.
     application = Application.builder().token(Config.TELEGRAM_TOKEN).build()
 
     # on different commands - answer in Telegram
-    application.add_handler(CommandHandler("start", start))
+    application.add_handler(CommandHandler("start", partial(start, timetable)))
     application.add_handler(CommandHandler("help", help_command))
 
     # on non command i.e message - echo the message on Telegram
