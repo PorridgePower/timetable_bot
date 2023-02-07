@@ -86,7 +86,7 @@ def parse_timetable(tableData):
                 [str(tableData[r][c]) for r in range(2, len(tableData))],
             )
         )
-    return table
+    return {tableData[0][0]: table}
 
 
 def request_sheets(sheetId=SAMPLE_SPREADSHEET_ID, rangeName=SAMPLE_RANGE_NAME):
