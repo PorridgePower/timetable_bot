@@ -8,6 +8,7 @@ from telegram.ext import (
     ContextTypes,
     MessageHandler,
     filters,
+    CallbackQueryHandler,
 )
 import sheets
 
@@ -33,6 +34,15 @@ async def start(timetable, update: Update, context: ContextTypes.DEFAULT_TYPE) -
     )
 
 
+async def callback_button(timetable, update, context):
+    query = update.callback_query
+    table = "\n".join(
+        [f"{day}:  {hours}" for day, hours in timetable[query.data].items()]
+    )
+    await query.answer()
+    await query.edit_message_text(text=f"{table}")
+
+
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Send a message when the command /help is issued."""
     await update.message.reply_text("Help is not ready yet, sorry :C")
@@ -51,6 +61,7 @@ def main() -> None:
 
     # on different commands - answer in Telegram
     application.add_handler(CommandHandler("start", partial(start, timetable)))
+    application.add_handler(CallbackQueryHandler(partial(callback_button, timetable)))
     application.add_handler(CommandHandler("help", help_command))
 
     # on non command i.e message - echo the message on Telegram
