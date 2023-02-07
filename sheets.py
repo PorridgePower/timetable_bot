@@ -31,7 +31,7 @@ def connect(creds):
         return None
 
 
-def get_table(sheetId, rangeId):
+def get_table(sheetId, rangeName):
     """
     Prints timetable colums.
     """
@@ -52,16 +52,52 @@ def get_table(sheetId, rangeId):
     try:
         # Call the Sheets API
         sheet = service.spreadsheets()
-        result = sheet.values().get(spreadsheetId=sheetId, range=rangeId).execute()
+        result = sheet.values().get(spreadsheetId=sheetId, range=rangeName).execute()
         values = result.get("values", [])
 
         if not values:
             print("No data found.")
-            return values
 
-        print(values[1][0])
-        for row in values:
-            print("\t".join([str(elem) for elem in row[1:]]))
     except HttpError as err:
         print(err)
     return values
+
+
+def parse_timetable(tableData):
+    """Convert raw rows to timetable dict.
+
+    Args:
+        tableData (list): Raw Sheet data.
+
+    Returns:
+        dict: Timetable structured dict.
+    """
+    print("Header: %s" % tableData[0][0])
+    for row in tableData[1:]:
+        print("\t".join([str(elem) for elem in row]))
+
+    table = {}
+    for item in tableData[1]:
+        table[item] = None
+        c = tableData[1].index(item)
+        table[item] = list(
+            filter(
+                lambda x: x != "",
+                [str(tableData[r][c]) for r in range(2, len(tableData))],
+            )
+        )
+    return table
+
+
+def request_sheets(sheetId=SAMPLE_SPREADSHEET_ID, rangeName=SAMPLE_RANGE_NAME):
+    """Requests and parse data form sheet.
+
+    Args:
+        sheetId (str): Google Sheet ID. Defaults to SAMPLE_SPREADSHEET_ID.
+        rangeName (str): Range of cells. Defaults to SAMPLE_RANGE_NAME.
+
+    Returns:
+        dict: Parsed timetable.
+    """
+    raw_table = get_table(sheetId, rangeName)
+    return parse_timetable(raw_table)
