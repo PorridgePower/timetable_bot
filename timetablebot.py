@@ -1,6 +1,5 @@
 import logging
 from functools import partial
-from config import Config
 from telegram import ForceReply, Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     Application,
@@ -12,17 +11,19 @@ from telegram.ext import (
     ConversationHandler,
 )
 import sheets
+from config import Config
 
 # states
 START, SPOT, TIMETABLE = range(3)
 # callback returning values
 SUB, BACK = range(2)
 
+# Temporary test solution for subscribers
 TMP_DB = {}
 
 # Enable logging
 logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
+    format="%(asctime)s -- %(levelname)s - %(message)s", level=logging.INFO
 )
 logger = logging.getLogger(__name__)
 
@@ -49,7 +50,7 @@ async def start(timetable, update: Update, context: ContextTypes.DEFAULT_TYPE) -
     else:
         query = update.callback_query
         await query.answer()
-        await update.callback_query.message.edit_text(msg, reply_markup=reply_markup)
+        await query.message.edit_text(msg, reply_markup=reply_markup)
     return SPOT
 
 
