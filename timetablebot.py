@@ -18,6 +18,8 @@ START, SPOT, TIMETABLE = range(3)
 # callback returning values
 SUB, BACK = range(2)
 
+TMP_DB = {}
+
 # Enable logging
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
@@ -87,6 +89,7 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 def main() -> None:
     timetable = sheets.request_sheets()
+    TMP_DB.update({k: [] for k in timetable.keys()})
 
     """Start the bot."""
     application = Application.builder().token(Config.TELEGRAM_TOKEN).build()
