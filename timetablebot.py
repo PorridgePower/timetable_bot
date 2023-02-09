@@ -35,16 +35,15 @@ async def start(timetable, update: Update, context: ContextTypes.DEFAULT_TYPE) -
 
     reply_markup = InlineKeyboardMarkup(keyboard)
 
+    msg = f"Hi {user.full_name}! Select a subsidiary:"
+
+    # TODO: Fix this moment
     if update.message is not None:
-        await update.message.reply_text(
-            f"Hi {user.full_name}! Select a subsidiary:", reply_markup=reply_markup
-        )
+        await update.message.reply_text(msg, reply_markup=reply_markup)
     else:
         query = update.callback_query
         await query.answer()
-        await update.callback_query.message.edit_text(
-            f"Hi {user.full_name}! Select a subsidiary:", reply_markup=reply_markup
-        )
+        await update.callback_query.message.edit_text(msg, reply_markup=reply_markup)
     return SPOT
 
 
