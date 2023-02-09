@@ -14,7 +14,7 @@ Bot providing users with an up-to-date class schedule.
 
 2. Create Google Sheets table
 
-![изображение](https://user-images.githubusercontent.com/62947325/217818036-01f7ff16-d5be-4936-bebc-65ac9f344eee.png)
+![изображение](https://user-images.githubusercontent.com/62947325/217827041-ce18a3e5-7e54-470e-ab4b-b21244dcfe2e.png)
 
 3. Enable Google API 
 
@@ -34,7 +34,7 @@ RANGE_NAME = <cells range>
 
 1. Start interactive with bot
 
-![изображение](https://user-images.githubusercontent.com/62947325/217820301-4f9e6015-ac13-44bb-868f-32d4e007a530.png)
+![изображение](https://user-images.githubusercontent.com/62947325/217826930-f1063b8f-9a5b-4901-b35d-e5ee01891ece.png)
 
 2. Get timetable
 
