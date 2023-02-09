@@ -27,6 +27,10 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+def subscribe(user, update):
+    TMP_DB[update].append(user)
+
+
 # Define a few command handlers. These usually take the two arguments update and
 # context.
 async def start(timetable, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -60,7 +64,9 @@ async def choose_place_btn_callback(timetable, update, context):
     )
     keyboard = [
         [
-            InlineKeyboardButton("Subsctibe to this subsidiary", callback_data=SUB),
+            InlineKeyboardButton(
+                "Subsctibe to this subsidiary", callback_data=f"SUB%{query.data}"
+            ),
             InlineKeyboardButton("Back", callback_data=BACK),
         ]
     ]
@@ -74,7 +80,11 @@ async def subscribe_btn_callback(timetable, update, context):
     # this is stub
     query = update.callback_query
     await query.answer()
-    return TIMETABLE
+    subsidiary = query.data.split("%")[1]
+    await query.edit_message_text(f"You subscribed to {subsidiary} timetable updates!")
+    logging.info(f"{update.effective_user.full_name} subscribed to {subsidiary}")
+    subscribe(update.effective_chat.id, subsidiary)
+    return ConversationHandler.END
 
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -103,10 +113,8 @@ def main() -> None:
             ],
             # TIMETABLE - Shows timetable for selected place
             TIMETABLE: [
-                CallbackQueryHandler(
-                    partial(subscribe_btn_callback, timetable),
-                    pattern="^" + str(SUB) + "$",
-                ),
+                # TODO: Fix pattern="^" + str(SUB) + "%.+" + "$" mismatching
+                CallbackQueryHandler(partial(subscribe_btn_callback, timetable)),
                 CallbackQueryHandler(
                     partial(start, timetable), pattern="^" + str(BACK) + "$"
                 ),
