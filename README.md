@@ -40,10 +40,13 @@ RANGE_NAME = <cells range>
 
 ![изображение](https://user-images.githubusercontent.com/62947325/217820441-a3e3078f-650c-4cc0-b116-6f99b528b2a1.png)
 
-3. And sunscribe
+3. Sunscribe
 
 ![изображение](https://user-images.githubusercontent.com/62947325/217820676-4d5b5a7d-899c-4455-bb6e-6027798d53cb.png)
 
+4. And wait for notifications
+
+![изображение](https://user-images.githubusercontent.com/62947325/217831915-2a08a268-bc6d-4da7-94ab-caa3a556c215.png)
 
 ## TODOs
 - [ ] Dabadase integration
