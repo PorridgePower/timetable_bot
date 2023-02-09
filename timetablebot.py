@@ -9,6 +9,7 @@ from telegram.ext import (
     filters,
     CallbackQueryHandler,
     ConversationHandler,
+    CallbackContext,
 )
 import sheets
 from config import Config
@@ -20,6 +21,8 @@ SUB, BACK = range(2)
 
 # Temporary test solution for subscribers
 TMP_DB = {}
+# For Sheets changes momitoring
+HASHES = {}
 
 # Enable logging
 logging.basicConfig(
@@ -98,9 +101,29 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text("Hello!")
 
 
+async def check_updates(context: CallbackContext):
+    timetable = sheets.request_sheets()
+    for k, v in HASHES.items():
+        if hash(str(timetable[k])) != v:
+            logging.info(f"Timetable for {k} was updated")
+            # send message to all users subscribed to subsidiary
+            for id in TMP_DB[k]:
+                table = "\n".join(
+                    [
+                        "%s:   %s" % (day, "   ".join(hours))
+                        for day, hours in timetable[k].items()
+                    ]
+                )
+                await context.bot.send_message(
+                    chat_id=id, text=(f"Timetable for {k} was updated:\n{table}")
+                )
+            HASHES[k] = timetable[k]
+
+
 def main() -> None:
     timetable = sheets.request_sheets()
     TMP_DB.update({k: [] for k in timetable.keys()})
+    HASHES.update({k: hash(str(v)) for k, v in timetable.items()})
 
     """Start the bot."""
     application = Application.builder().token(Config.TELEGRAM_TOKEN).build()
@@ -124,6 +147,9 @@ def main() -> None:
         fallbacks=[CommandHandler("start", start)],
     )
     application.add_handler(conv_handler)
+
+    jq = application.job_queue
+    jq.run_repeating(check_updates, interval=3600, first=3600)
 
     # Run the bot until the user presses Ctrl-C
     application.run_polling()
