@@ -9,13 +9,14 @@ from google.oauth2 import service_account
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+from config import Config
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
 
 # The ID of a sample document.
-SAMPLE_SPREADSHEET_ID = "1IjLE8q79Si2RaajefVRHuPUdqlSvNaN-H7MS3L9thxM"
-SAMPLE_RANGE_NAME = "Sheet1!A1:H13"
+SPREADSHEET_ID = Config.SPREADSHEET_ID
+RANGE_NAME = Config.RANGE_NAME
 
 
 def connect(creds):
@@ -89,12 +90,12 @@ def parse_timetable(tableData):
     return {tableData[0][0]: table}
 
 
-def request_sheets(sheetId=SAMPLE_SPREADSHEET_ID, rangeName=SAMPLE_RANGE_NAME):
+def request_sheets(sheetId=SPREADSHEET_ID, rangeName=RANGE_NAME):
     """Requests and parse data form sheet.
 
     Args:
-        sheetId (str): Google Sheet ID. Defaults to SAMPLE_SPREADSHEET_ID.
-        rangeName (str): Range of cells. Defaults to SAMPLE_RANGE_NAME.
+        sheetId (str): Google Sheet ID. Defaults to SPREADSHEET_ID.
+        rangeName (str): Range of cells. Defaults to RANGE_NAME.
 
     Returns:
         dict: Parsed timetable.
