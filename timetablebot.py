@@ -37,7 +37,10 @@ async def start(timetable, update: Update, context: ContextTypes.DEFAULT_TYPE) -
 async def callback_button(timetable, update, context):
     query = update.callback_query
     table = "\n".join(
-        [f"{day}:  {hours}" for day, hours in timetable[query.data].items()]
+        [
+            "%s:   %s" % (day, "   ".join(hours))
+            for day, hours in timetable[query.data].items()
+        ]
     )
     await query.answer()
     await query.edit_message_text(text=f"{table}")
