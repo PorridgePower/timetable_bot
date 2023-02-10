@@ -1,5 +1,4 @@
 import logging
-from functools import partial
 from telegram import ForceReply, Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     Application,
@@ -37,10 +36,10 @@ def subscribe(user, update):
 
 # Define a few command handlers. These usually take the two arguments update and
 # context.
-async def start(timetable, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Send a message when the command /start is issued."""
     user = update.effective_user
-
+    timetable = context.bot_data["timetable"]
     keyboard = [[InlineKeyboardButton(k, callback_data=k) for k in timetable.keys()]]
 
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -57,8 +56,9 @@ async def start(timetable, update: Update, context: ContextTypes.DEFAULT_TYPE) -
     return SPOT
 
 
-async def choose_place_btn_callback(timetable, update, context):
+async def choose_place_btn_callback(update, context):
     query = update.callback_query
+    timetable = context.bot_data["timetable"]
     await query.answer()
     table = "\n".join(
         [
@@ -80,7 +80,7 @@ async def choose_place_btn_callback(timetable, update, context):
     return TIMETABLE
 
 
-async def subscribe_btn_callback(timetable, update, context):
+async def subscribe_btn_callback(update, context):
     # this is stub
     query = update.callback_query
     await query.answer()
@@ -118,6 +118,7 @@ async def check_updates(context: CallbackContext):
                     chat_id=id, text=(f"Timetable for {k} was updated:\n{table}")
                 )
             HASHES[k] = timetable[k]
+            context.bot_data["timetable"] = timetable
 
 
 def main() -> None:
@@ -129,24 +130,24 @@ def main() -> None:
     application = Application.builder().token(Config.TELEGRAM_TOKEN).build()
 
     conv_handler = ConversationHandler(
-        entry_points=[CommandHandler("start", partial(start, timetable))],
+        entry_points=[CommandHandler("start", start)],
         states={
             # SPOT - Shows places
             SPOT: [
-                CallbackQueryHandler(partial(choose_place_btn_callback, timetable)),
+                CallbackQueryHandler(choose_place_btn_callback),
             ],
             # TIMETABLE - Shows timetable for selected place
             TIMETABLE: [
                 # TODO: Fix pattern="^" + str(SUB) + "%.+" + "$" mismatching
-                CallbackQueryHandler(partial(subscribe_btn_callback, timetable)),
-                CallbackQueryHandler(
-                    partial(start, timetable), pattern="^" + str(BACK) + "$"
-                ),
+                CallbackQueryHandler(subscribe_btn_callback),
+                CallbackQueryHandler(start, pattern="^" + str(BACK) + "$"),
             ],
         },
         fallbacks=[CommandHandler("start", start)],
     )
     application.add_handler(conv_handler)
+
+    application.bot_data["timetable"] = timetable
 
     jq = application.job_queue
     jq.run_repeating(check_updates, interval=3600, first=3600)
