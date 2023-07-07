@@ -69,14 +69,18 @@ async def choose_place_btn_callback(update, context):
     keyboard = [
         [
             InlineKeyboardButton(
-                "Subsctibe to this subsidiary", callback_data=f"SUB%{query.data}"
+                "Subscribe to this subsidiary", callback_data=f"SUB%{query.data}"
             ),
             InlineKeyboardButton("Back", callback_data=BACK),
         ]
     ]
 
     reply_markup = InlineKeyboardMarkup(keyboard)
-    await query.edit_message_text(f"{table}", reply_markup=reply_markup)
+    await query.edit_message_text(
+        f"```\n{table}\n```",
+        reply_markup=reply_markup,
+        parse_mode="Markdown",
+    )
     return TIMETABLE
 
 
@@ -115,7 +119,9 @@ async def check_updates(context: CallbackContext):
                     ]
                 )
                 await context.bot.send_message(
-                    chat_id=id, text=(f"Timetable for {k} was updated:\n{table}")
+                    chat_id=id,
+                    text=(f"Timetable for {k} was updated:\n```\n{table}\n```"),
+                    parse_mode="Markdown",
                 )
             HASHES[k] = timetable[k]
             context.bot_data["timetable"] = timetable
